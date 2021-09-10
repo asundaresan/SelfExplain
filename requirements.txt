@@ -12,7 +12,7 @@ nltk == 3.5
 # SelfExplain/model/infer_model.py: 4
 # SelfExplain/model/run.py: 4
 # SelfExplain/preprocessing/constituency_parse.py: 4
-numpy == 1.17.0
+numpy == 1.17.1
 
 # SelfExplain/model/model_utils.py: 10
 overrides == 3.1.0
