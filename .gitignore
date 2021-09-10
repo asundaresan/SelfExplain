@@ -1,6 +1,13 @@
-# SCRIPTS for beaker
-
 beaker/*
 run_beaker_jobs.sh
-
 demo/*
+*~
+.*.swp
+*.pyc
+*.pkl
+/tmp
+/*.egg-info
+/venv
+/output
+/annotations
+/*.json
