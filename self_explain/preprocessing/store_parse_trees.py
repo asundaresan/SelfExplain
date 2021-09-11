@@ -3,7 +3,7 @@ import csv
 import json
 from typing import Dict
 
-from preprocessing.constituency_parse import ParseTree
+from .constituency_parse import ParseTree
 
 
 class ParsedDataset(object):
@@ -56,3 +56,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
