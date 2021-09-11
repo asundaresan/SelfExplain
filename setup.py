@@ -2,6 +2,10 @@
 
 from setuptools import setup, find_packages
 
+
+with open('requirements.txt') as f:
+    requirements = f.read()
+
 setup(name='self_explain',
       version='0.0.1dev',
       description='Self Explain module',
@@ -13,20 +17,7 @@ setup(name='self_explain',
       packages=find_packages(),
       scripts=[
           ],
-      install_requires=[
-          "numpy>=1.7",
-          "pandas",
-          "nltk",
-          "benepar",
-          "overrides",
-          "scipy",
-          "pytorch_lightning",
-          "torch",
-          "requests",
-          "tqdm",
-          "transformers",
-          "wordcloud",
-          ],
+      install_requires=requirements, 
       zip_safe=False
       )
 
