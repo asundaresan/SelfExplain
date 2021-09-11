@@ -6,7 +6,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel, RobertaConfig, XLNetConfig
 from transformers.modeling_utils import SequenceSummary
 
-from utils import chunks
+from .utils import chunks
 
 config_dict = {'xlnet-base-cased': XLNetConfig,
                'roberta-base': RobertaConfig}
