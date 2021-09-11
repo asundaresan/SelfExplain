@@ -6,8 +6,8 @@ import pytorch_lightning as pl
 import logging
 from argparse import ArgumentParser
 import resource
-from data import ClassificationData
-from SE_XLNet import SEXLNet
+from self_explain.model.data import ClassificationData
+from self_explain.model.SE_XLNet import SEXLNet
 
 def get_train_steps(dm):
   total_devices = args.num_gpus * args.num_nodes

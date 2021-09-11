@@ -7,7 +7,7 @@ from torch.optim import AdamW
 from transformers import AutoModel, AutoConfig
 from transformers.modeling_utils import SequenceSummary
 
-from model_utils import TimeDistributed
+from .model_utils import TimeDistributed
 
 
 class SEXLNet(LightningModule):
