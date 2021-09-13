@@ -9,3 +9,6 @@ print(f"pytorch_lightning.version={pytorch_lightning.__version__}")
 import transformers 
 print(f"transformers.version={transformers.__version__}")
 
+import numpy
+print(f"numpy.version={numpy.__version__}")
+
