@@ -3,6 +3,8 @@ import csv
 import json
 from typing import Dict
 
+import tqdm
+
 from .constituency_parse import ParseTree
 
 
@@ -13,10 +15,14 @@ class ParsedDataset(object):
 
     def read_and_store_from_tsv(self, input_file_name, output_file_name):
         with open(output_file_name, 'w') as output_file:
+            # get total to print output
+            with open(input_file_name, 'r') as open_file:
+                reader = csv.reader(open_file, delimiter='\t')
+                total = sum(1 for row in reader)
             with open(input_file_name, 'r') as open_file:
                 reader = csv.reader(open_file, delimiter='\t')
                 next(reader, None)  # skip header
-                for row in reader:
+                for row in tqdm.tqdm(reader, total=total):
                     text = row[0]
                     parse_tree, nt_idx_matrix = self.parser.get_parse_tree_for_raw_sent(raw_sent=text)
                     datapoint_dict = {'sentence': row[0],
