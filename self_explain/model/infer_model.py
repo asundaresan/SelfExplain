@@ -1,4 +1,5 @@
 import json
+import logging
 from operator import itemgetter
 
 import torch
@@ -9,8 +10,8 @@ import pandas as pd
 import resource
 from argparse import ArgumentParser
 
-from SE_XLNet import SEXLNet
-from data import ClassificationData
+from .SE_XLNet import SEXLNet
+from .data import ClassificationData
 
 
 def load_model(ckpt, batch_size):
@@ -30,7 +31,7 @@ def load_dev_examples(file_name):
     return dev_samples
 
 
-def eval(model, dataloader, concept_map, dev_file, paths_output_loc: str = None):
+def evaluate(model, dataloader, concept_map, dev_file, paths_output_loc: str = None):
     dev_samples = load_dev_examples(dev_file)
     total_evaluated = 0.
     total_correct = 0.
@@ -57,8 +58,7 @@ def eval(model, dataloader, concept_map, dev_file, paths_output_loc: str = None)
 
             total_evaluated += len(batch)
             total_correct += (acc.item() * len(batch))
-            print(
-                f"Accuracy = {round((total_correct * 100) / (total_evaluated), 2)}, Batch accuracy = {round(acc.item(), 2)}")
+            logging.info(f"Accuracy = {round((total_correct * 100) / (total_evaluated), 2)}, Batch accuracy = {round(acc.item(), 2)}")
             i += input_tokens.size(0)
         print(f"Accuracy = {round((total_correct * 100) / (total_evaluated), 2)}")
         print(f"Accuracy = {round(np.array(accs).mean(), 2)}")
