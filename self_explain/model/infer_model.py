@@ -12,14 +12,16 @@ from argparse import ArgumentParser
 
 from .SE_XLNet import SEXLNet
 from .data import ClassificationData
+from .devices import get_gpus
 
 
-def load_model(ckpt, batch_size):
+def load_model(ckpt, batch_size, gpus=1):
     model = SEXLNet.load_from_checkpoint(ckpt)
     model.eval()
-    trainer = Trainer(gpus=1)
-    dm = ClassificationData(basedir=model.hparams.dataset_basedir, tokenizer_name=model.hparams.model_name,
-                            batch_size=batch_size)
+    # return number of gpus available, i.e. min(available_gpus, requested_gpus)
+    gpus = get_gpus(gpus)
+    trainer = Trainer(gpus=gpus)
+    dm = ClassificationData(basedir=model.hparams.dataset_basedir, tokenizer_name=model.hparams.model_name, batch_size=batch_size)
     return model, trainer, dm
 
 
@@ -101,23 +103,3 @@ def load_concept_map(concept_map_path):
         concept_map[int(key)] = value
     return concept_map
 
-
-if __name__ == "__main__":
-    rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-    resource.setrlimit(resource.RLIMIT_NOFILE, (4096, rlimit[1]))
-
-    parser = ArgumentParser()
-    parser.add_argument('--ckpt', type=str)
-    parser.add_argument('--concept_map', type=str)
-    parser.add_argument('--dev_file', type=str, default="")
-    parser.add_argument('--paths_output_loc', type=str, default="")
-    parser.add_argument('--batch_size', type=int, default=1)
-    args = parser.parse_args()
-    model, trainer, dm = load_model(args.ckpt,
-                                    batch_size=args.batch_size)
-    concept_map = load_concept_map(args.concept_map)
-    eval(model,
-         dm.val_dataloader(),
-         concept_map=concept_map,
-         dev_file=args.dev_file,
-         paths_output_loc=args.paths_output_loc)
