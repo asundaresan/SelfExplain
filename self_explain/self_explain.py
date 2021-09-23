@@ -85,8 +85,8 @@ class SelfExplainCharacterizer(object):
         # get location of parse_tree_filename
         parse_tree_filename = self.compute_parse_tree(data)
         batch_size = min(256, len(data))
-        results = self.evaluate(parse_tree_filename, batch_size=batch_size)
-        return results
+        result = self.evaluate(parse_tree_filename, batch_size=batch_size)
+        return result
 
 
     def evaluate(self, parse_tree_filename, batch_size=1):
@@ -119,5 +119,6 @@ class SelfExplainCharacterizer(object):
                 result["predicted_labels"].extend(predicted_labels)
                 result["gil_interpretations"].extend(gil_interpretations)
                 result["lil_interpretations"].extend(lil_interpretations)
+        return result
 
 
