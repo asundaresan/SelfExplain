@@ -16,4 +16,6 @@ if [[ ! -f ${folder}/bin/activate ]]; then
 fi
 
 source ${folder}/bin/activate
+echo "Please run the following to update to latest: "
+echo python -m pip install -U pip setuptools wheel
 
