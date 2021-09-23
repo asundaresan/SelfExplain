@@ -73,7 +73,7 @@ class SelfExplainCharacterizer(object):
 
 
     def process(self, text: str, convert=False):
-        """ Process image and caption together to get an LLR value.
+        """ Process text to get probability and evidence
 
         Args: 
             text (str): text to process 
@@ -86,7 +86,10 @@ class SelfExplainCharacterizer(object):
         parse_tree_filename = self.compute_parse_tree(data)
         batch_size = min(256, len(data))
         result = self.evaluate(parse_tree_filename, batch_size=batch_size)
-        return result
+        # XXX this should be max of score values 
+        prob = max(result["predicted_labels"])
+        evidence = dict()
+        return prob, evidence
 
 
     def evaluate(self, parse_tree_filename, batch_size=1):
@@ -115,6 +118,7 @@ class SelfExplainCharacterizer(object):
                 #accs.append(acc)
                 # Note that these labels are meaningless
                 #true_labels.extend(labels.tolist())
+                # XXX TODO this should return a value between 0 and 1 so that we can apply a threshold
                 predicted_labels = torch.argmax(logits, -1).tolist()
                 result["predicted_labels"].extend(predicted_labels)
                 result["gil_interpretations"].extend(gil_interpretations)

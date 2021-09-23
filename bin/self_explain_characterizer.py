@@ -40,5 +40,5 @@ if __name__ == "__main__":
         data = data[:args.number]
 
     for row in data:
-        result = ch.process(row["sentence"], convert=False)
+        prob, evidence = ch.process(row["sentence"], convert=False)
 
