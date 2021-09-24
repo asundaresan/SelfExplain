@@ -34,11 +34,14 @@ def convert_to_sentences(text, convert=False, label=0) -> list:
 
 class SelfExplainCharacterizer(object):
     def __init__(self, checkpoint_filename=None, concept_map_filename=None, **kwargs):
+        # get override parameters for load_from_checkpoint (concept_store, hparams, etc)
+        checkpoint_kwargs = kwargs.get("checkpoint_kwargs", {})
+        # what tokenizer to use 
         parser_tokenizer_name = kwargs.get("parser_tokenizer", "xlnet-base-cased")
         if checkpoint_filename is None:
             raise RuntimeError(f"checkpoint_filename=None, but it should be specified!")
         print(f"- loading checkpoint from {checkpoint_filename}")
-        self.model = SEXLNet.load_from_checkpoint(checkpoint_filename)
+        self.model = SEXLNet.load_from_checkpoint(checkpoint_filename, **checkpoint_kwargs)
         self.model.eval()
         if concept_map_filename is None:
             raise RuntimeError(f"concept_map_filename=None, but it should be specified!")
