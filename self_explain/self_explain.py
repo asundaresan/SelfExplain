@@ -33,12 +33,12 @@ def convert_to_sentences(text, convert=False, label=0) -> list:
 
 
 class SelfExplainCharacterizer(object):
-    def __init__(self, checkpoint=None, concept_map_filename=None, **kwargs):
+    def __init__(self, checkpoint_filename=None, concept_map_filename=None, **kwargs):
         parser_tokenizer_name = kwargs.get("parser_tokenizer", "xlnet-base-cased")
-        if checkpoint is None:
+        if checkpoint_filename is None:
             raise RuntimeError(f"ImageCaptionCharacterizer model file missing!")
-        print(f"- loading checkpoint from {checkpoint}")
-        self.model = SEXLNet.load_from_checkpoint(checkpoint)
+        print(f"- loading checkpoint from {checkpoint_filename}")
+        self.model = SEXLNet.load_from_checkpoint(checkpoint_filename)
         self.model.eval()
         print(f"- loading concept map from {concept_map_filename}")
         self.concept_map = load_concept_map(concept_map_filename)

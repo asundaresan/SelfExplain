@@ -2,6 +2,7 @@ import logging
 import json
 import resource
 import csv 
+import os
 from argparse import ArgumentParser
 
 from self_explain.self_explain import SelfExplainCharacterizer
@@ -21,8 +22,9 @@ if __name__ == "__main__":
     #rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
     #resource.setrlimit(resource.RLIMIT_NOFILE, (4096, rlimit[1]))
     parser = ArgumentParser()
-    parser.add_argument('--checkpoint', type=str, default="model/checkpoint.ckpt", help="Checkpoint to load")
-    parser.add_argument('--concept_map_filename', type=str, default="model/concept_idx.json", help="Concept store file to load")
+    parser.add_argument('--checkpoint_filename', type=str, default=None, help="Checkpoint to load")
+    parser.add_argument('--concept_map_filename', type=str, default=None, help="Concept store file to load")
+    parser.add_argument('--version', type=str, default="0.0.1", help="Model version number")
     parser.add_argument('--tsv_filename', type=str, default="data/SST-2-XLNet/test.tsv", help="dev/test TSV file to load")
     parser.add_argument('--number', "-n", type=int, default=0, help="Number of samples to process")
     parser.add_argument("--verbosity", "-v", action="count", default=0, help="Verbosity level")
@@ -33,7 +35,11 @@ if __name__ == "__main__":
 
     data = load_tsv(args.tsv_filename)
 
-    kwargs = dict(checkpoint=args.checkpoint, concept_map_filename=args.concept_map_filename)
+    model_dir = os.path.join(os.path.expanduser('~'), ".malise", "models", "self_explain", args.version)
+    checkpoint_filename = os.path.join(model_dir, "checkpoint.ckpt") if args.checkpoint_filename is None else args.checkpoint_filename
+    concept_map_filename = os.path.join(model_dir, "concept_idx.json") if args.concept_map_filename is None else args.concept_map_filename
+
+    kwargs = dict(checkpoint_filename=checkpoint_filename, concept_map_filename=concept_map_filename)
     ch = SelfExplainCharacterizer(**kwargs)
 
     if args.number > 0 and args.number < len(data):
