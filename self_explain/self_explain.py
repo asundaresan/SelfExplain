@@ -23,7 +23,7 @@ def convert_to_sentences(text, convert=False, label=0) -> list:
         text = re.sub(r"(\.)", r"\1\n", text)
         text = re.sub(r"(\?)", r"\1\n", text)
         text = re.sub(r"(\!)", r"\1\n", text)
-        text = re.sub(r"(\.|\?|\!|')", r" \1", text)
+        text = re.sub(r"(\.|\?|\!|,|')", r" \1", text)
         sentences = [s for s in text.split("\n") if len(s.split()) > 0]
     else:
         sentences = [text,]
