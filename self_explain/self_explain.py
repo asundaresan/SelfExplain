@@ -36,10 +36,12 @@ class SelfExplainCharacterizer(object):
     def __init__(self, checkpoint_filename=None, concept_map_filename=None, **kwargs):
         parser_tokenizer_name = kwargs.get("parser_tokenizer", "xlnet-base-cased")
         if checkpoint_filename is None:
-            raise RuntimeError(f"ImageCaptionCharacterizer model file missing!")
+            raise RuntimeError(f"checkpoint_filename=None, but it should be specified!")
         print(f"- loading checkpoint from {checkpoint_filename}")
         self.model = SEXLNet.load_from_checkpoint(checkpoint_filename)
         self.model.eval()
+        if concept_map_filename is None:
+            raise RuntimeError(f"concept_map_filename=None, but it should be specified!")
         print(f"- loading concept map from {concept_map_filename}")
         self.concept_map = load_concept_map(concept_map_filename)
         print(f"- parser tokenizer: {parser_tokenizer_name}")
