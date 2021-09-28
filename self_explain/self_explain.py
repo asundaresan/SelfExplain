@@ -92,7 +92,7 @@ class SelfExplainCharacterizer(object):
         batch_size = min(256, len(data))
         result = self.evaluate(parse_tree_filename, batch_size=batch_size)
         # XXX this should be max of score values 
-        prob = max(result["predicted_labels"])
+        prob = max(result["scores"])
         evidence = dict()
         return prob, evidence
 
@@ -107,7 +107,7 @@ class SelfExplainCharacterizer(object):
         dm = ClassificationData(basedir=basedir, tokenizer_name=self.model.hparams.model_name, batch_size=batch_size)
         dataloader = dm.val_dataloader()
         # initialize result 
-        result = dict(samples=samples, predicted_labels=[], gil_interpretations=[], lil_interpretations=[])
+        result = dict(samples=samples, predicted_labels=[], true_labels=[], scores=[], gil_interpretations=[], lil_interpretations=[])
         with torch.no_grad():
             for batch, dev_samples in zip(dataloader, dev_samples_batches):
                 input_tokens, token_type_ids, nt_idx_matrix, labels = batch
@@ -119,13 +119,17 @@ class SelfExplainCharacterizer(object):
                                                     list_of_interpret_dict=interpret_dict_list,
                                                     dev_samples=dev_samples,
                                                     current_idx=0)
-                # note that acc is meaningless as the labels are meaningless
+                # note that acc, true_labels is meaningless as the labels are meaningless
                 #accs.append(acc)
-                # Note that these labels are meaningless
-                #true_labels.extend(labels.tolist())
                 # XXX TODO this should return a value between 0 and 1 so that we can apply a threshold
-                predicted_labels = torch.argmax(logits, -1).tolist()
-                result["predicted_labels"].extend(predicted_labels)
+                pred_labels = torch.argmax(logits, -1).tolist()
+                pred_scores = torch.softmax(logits, -1).tolist()
+                # get the score for label 1
+                scores = [ps[1] for ps, pl in zip(pred_scores, pred_labels)]
+                logging.info(f"scores={scores}, pred_labels={pred_labels}, pred_scores={pred_scores}")
+                result["predicted_labels"].extend(pred_labels)
+                result["true_labels"].extend(labels.tolist())
+                result["scores"].extend(scores)
                 result["gil_interpretations"].extend(gil_interpretations)
                 result["lil_interpretations"].extend(lil_interpretations)
         return result
