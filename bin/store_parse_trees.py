@@ -16,7 +16,7 @@ def main():
 
     args = parser.parse_args()
 
-    parsed_data = ParsedDataset(tokenizer_name=args.tokenizer_name)
+    parsed_data = ParsedDataset(tokenizer_name=args.tokenizer_name, progress_bar=True)
 
     # Read input files from folder
     for file_split in args.splits:
