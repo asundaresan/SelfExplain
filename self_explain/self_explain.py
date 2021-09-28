@@ -62,17 +62,17 @@ class SelfExplainCharacterizer(object):
         data_dir = os.path.join(self.save_dir, f"{self.count:06d}")
         self.count += 1
         if not os.path.exists(data_dir):
-            print(f"creating working dir: {data_dir}")
+            logging.info(f"creating working dir: {data_dir}")
             os.makedirs(data_dir)
         input_filename = os.path.join(data_dir, "dev.tsv")
         output_filename = os.path.join(data_dir, "dev_with_parse.json")
         # write tsv
-        print(f"  writing text to {input_filename}")
+        logging.info(f"  writing text to {input_filename}")
         with open(input_filename, "w") as handle:
             writer = csv.DictWriter(handle, ["sentence", "label"], delimiter="\t")
             writer.writeheader()
             writer.writerows(data)
-        print(f"  writing parsed tree to {output_filename}")
+        logging.info(f"  writing parsed tree to {output_filename}")
         self.parsed_data.read_and_store_from_tsv(input_file_name=input_filename, output_file_name=output_filename)
         return output_filename
 

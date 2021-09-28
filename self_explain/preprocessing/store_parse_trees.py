@@ -9,9 +9,10 @@ from .constituency_parse import ParseTree
 
 
 class ParsedDataset(object):
-    def __init__(self, tokenizer_name):
+    def __init__(self, tokenizer_name, progress_bar=False):
         self.parse_trees: Dict[str, str] = {}
         self.parser = ParseTree(tokenizer_name=tokenizer_name)
+        self.disable = not progress_bar
 
     def read_and_store_from_tsv(self, input_file_name, output_file_name):
         with open(output_file_name, 'w') as output_file:
@@ -22,7 +23,7 @@ class ParsedDataset(object):
             with open(input_file_name, 'r') as open_file:
                 reader = csv.reader(open_file, delimiter='\t')
                 next(reader, None)  # skip header
-                for row in tqdm.tqdm(reader, total=total):
+                for row in tqdm.tqdm(reader, total=total, desc="Store parsed tree", disable=self.disable):
                     text = row[0]
                     parse_tree, nt_idx_matrix = self.parser.get_parse_tree_for_raw_sent(raw_sent=text)
                     datapoint_dict = {'sentence': row[0],

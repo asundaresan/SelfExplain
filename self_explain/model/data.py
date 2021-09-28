@@ -45,10 +45,11 @@ class ClassificationData(pl.LightningDataModule):
 
 
 class ClassificationDataset(Dataset):
-    def __init__(self, tokenizer, data_path: str) -> None:
+    def __init__(self, tokenizer, data_path: str, progress_bar=False) -> None:
         super().__init__()
         self.data_path = data_path
         self.tokenizer = tokenizer
+        self.disable = not progress_bar
         self.read_dataset()
 
 
@@ -58,7 +59,7 @@ class ClassificationDataset(Dataset):
         self.sentences, self.answer_labels, self.nt_idx_matrix = [], [], []
         logging.info(f"Reading dataset file from {self.data_path}")
         # print(data, len(data))
-        for i, row in tqdm(data.iterrows(), total=len(data), desc="Reading dataset samples"):
+        for i, row in tqdm(data.iterrows(), total=len(data), desc="Reading dataset samples", disable=self.disable):
             self.answer_labels.append(int(row["label"]))
             self.sentences.append(row["sentence"])
             self.nt_idx_matrix.append(torch.tensor(row["nt_idx_matrix"]).long())
