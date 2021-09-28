@@ -5,5 +5,7 @@ try:
 except DistributionNotFound:
   __version__ = "0.0.0"
 
+import os 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from .self_explain import SelfExplainCharacterizer
 
