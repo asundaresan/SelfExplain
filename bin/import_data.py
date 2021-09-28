@@ -34,22 +34,56 @@ def import_data(filenames, use_text=False) -> dict:
     return se_data
 
 
-def make_balanced_dataset(data: dict, split=dict(train=0.90, dev=1.0), save_dir=None):
-    """ Make balanced dataset from data
+def make_dataset(class_data: dict, split=dict(train=0.80, dev=0.1, test=0.1), balance=True, pad=True, save_dir=None):
+    """ Make balanced dataset from class_data
+    Args: 
+        class_data (dict): data with samples stored as a list for each class (key)
+        split (dict): how to split data for training, dev (validation) and test
+        balance (bool): should the data be balanced, i.e. all classes should have the same amount of data
+        pad (bool): should the data be padded to make balanced dataset?
     """
-    samples = {key: len(value) for key, value in data.items()}
+    samples = {key: len(value) for key, value in class_data.items()}
     print(f"found {len(samples)} labels: {samples}")
-    total = min(samples.values())
-    start = 0
-    for split_key, split_frac in split.items():
-        end = int(split_frac*total)
-        split_data = list()
-        # for each label get the same amount of samples
-        for key, value in data.items():
-            print(f"  {split_key} <- {end-start} label '{key}'")
-            split_data.extend(value[start:end])
-        start = end
-        counter = collections.Counter(s["label"] for s in split_data)
+    # set total to None if dataset does not have to be balanced else total samples for each class
+    if balance:
+        total = max(samples.values()) if pad else min(samples.values())
+    else:
+        total = None
+    # create split_data 
+    split_data = {key: [] for key in split}
+    # for each label get the same amount of samples
+    for key, value in class_data.items():
+        start = 0
+        class_total = len(value)
+        print(f"class '{key}': {len(value)} samples")
+        for split_key, split_frac in split.items():
+            split_len = int(split_frac*len(value))
+            split_total = int(split_frac*total) if total is not None else None
+            print(f"-- need to get {split_total} from {split_len}")
+            if split_total is None:
+                # balance=False
+                end = start+split_len
+                split_data[split_key].extend(value[start:end])
+                info = f"{start}:{end}"
+            elif split_len >= split_total:
+                # balance=True, pad=False
+                end = start+split_total
+                split_data[split_key].extend(value[start:end])
+                info = f"{start}:{end}"
+            else:
+                # balance=True, pad=True
+                # padding will repeat low population classes wholly (not partially)
+                # it will be strictly lesser than 
+                end = start+split_len
+                repeat = split_total//split_len
+                info = f"{start}:{end} x {repeat}"
+                for _ in range(repeat):
+                    split_data[split_key].extend(value[start:end])
+            print(f"  {split_key} <- {info}")
+            start = end
+                    
+    for key, data in split_data.items():
+        counter = collections.Counter(s["label"] for s in data)
         print(f"{split_key}: {counter}")
 
         if save_dir is not None:
@@ -57,11 +91,11 @@ def make_balanced_dataset(data: dict, split=dict(train=0.90, dev=1.0), save_dir=
                 os.makedirs(save_dir)
             filename = os.path.join(save_dir, f"{split_key}.tsv")
             fieldnames = ["sentence", "label"]
-            print(f"writing to {filename}: {len(split_data)} samples")
+            print(f"writing to {filename}: {len(data)} samples")
             with open(filename, "w") as handle:
                 writer = csv.DictWriter(handle, fieldnames=fieldnames, delimiter="\t")
                 writer.writeheader()
-                for row in split_data:
+                for row in data:
                     writer.writerow(row)
 
 
@@ -77,5 +111,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=console_level, format='[%(asctime)s %(levelname)s] %(message)s')
 
     data = import_data(args.filenames)
-    make_balanced_dataset(data, save_dir=args.save_dir)
+    make_dataset(data, save_dir=args.save_dir, balance=True, pad=True)
 
