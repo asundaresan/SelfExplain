@@ -6,7 +6,6 @@ except DistributionNotFound:
   __version__ = "0.0.0"
 
 import os 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from .self_explain import SelfExplainCharacterizer
 
 def download_benepar():
@@ -25,6 +24,12 @@ def set_resource_limit():
     print(f"setting resource.RLIMIT_NOFILE={rlimit_new} (was {rlimit_old})")
     resource.setrlimit(resource.RLIMIT_NOFILE, rlimit_new)
 
+# do not use parallel processing for tokenizers
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+# set resource limit 
 set_resource_limit()
+
+# download benepar
 download_benepar()
 
