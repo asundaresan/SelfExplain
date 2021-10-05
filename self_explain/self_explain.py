@@ -104,7 +104,7 @@ class SelfExplainCharacterizer(object):
         dev_samples_batches = [samples[start:start+batch_size] for start in range(0, len(samples), batch_size)]
         # get dataloader 
         basedir = os.path.dirname(parse_tree_filename)
-        dm = ClassificationData(basedir=basedir, tokenizer_name=self.model.hparams.model_name, batch_size=batch_size)
+        dm = ClassificationData(basedir=basedir, tokenizer_name=self.model.hparams.model_name, batch_size=batch_size, num_workers=1)
         dataloader = dm.val_dataloader()
         # initialize result 
         result = dict(samples=samples, predicted_labels=[], true_labels=[], scores=[], gil_interpretations=[], lil_interpretations=[])
