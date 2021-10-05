@@ -19,8 +19,6 @@ def load_tsv(filename):
 
 
 if __name__ == "__main__":
-    #rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-    #resource.setrlimit(resource.RLIMIT_NOFILE, (4096, rlimit[1]))
     parser = ArgumentParser()
     parser.add_argument('--checkpoint_filename', type=str, default=None, help="Checkpoint to load")
     parser.add_argument('--concept_map_filename', type=str, default=None, help="Concept store file to load")
@@ -45,6 +43,13 @@ if __name__ == "__main__":
     if args.number > 0 and args.number < len(data):
         data = data[:args.number]
 
+    results = list()
     for row in data:
         prob, evidence = ch.process(row["sentence"], convert=False)
+        result = dict(sentence=row["sentence"], label=row.get("label", None), prob=prob, evidence=evidence)
+        results.append(result)
+
+    results_filename = os.path.splitext(args.tsv_filename)[0] + "_results.json"
+    with open(results_filename, "w") as handle:
+        json.dump(results, handle, indent=2)
 
