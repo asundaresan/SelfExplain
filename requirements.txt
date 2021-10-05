@@ -7,6 +7,6 @@ overrides == 3.1.0
 pandas 
 pytorch_lightning == 1.1.2
 requests == 2.23.0
-torch == 1.6.0
+torch == 1.7.1
 tqdm 
 transformers == 4.3.3
