@@ -11,6 +11,14 @@ from .data import make_dataset
 description = """Import ISOT data into SE style data
 """
 
+def clean_text(sentence):
+    val = sentence.split(" - ")
+    if len(val[0].split()) < 10:
+        clean_text.sources.update(val[0:1])
+        sentence = " - ".join(val[1:])
+    return sentence
+clean_text.sources = collections.Counter()
+
 def load_isot(filename: str, se_data: dict, label=None, use_text=True, use_title=False) -> dict:
     """ Import ISOT data into an SE compatible format
     """
@@ -19,6 +27,7 @@ def load_isot(filename: str, se_data: dict, label=None, use_text=True, use_title
 
         for row in tqdm.tqdm(reader, desc=f"loading {filename}"):
             sentence = row.get("text")
+            sentence = clean_text(sentence)
             d = dict(sentence=sentence, label=label)
             if not label in se_data:
                 se_data[label] = []
@@ -40,6 +49,7 @@ def import_isot():
 
     data = dict()
     load_isot(true_filename, data, label=0)
+    print(f"sources={clean_text.sources}")
     load_isot(fake_filename, data, label=1)
 
     make_dataset(data, save_dir=args.save_dir, balance=True, pad=False)
