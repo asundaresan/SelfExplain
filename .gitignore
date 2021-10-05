@@ -13,3 +13,4 @@
 /annotations
 /*.json
 /lightning_logs
+/build
