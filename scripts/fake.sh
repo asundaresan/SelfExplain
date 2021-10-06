@@ -21,3 +21,9 @@ echo python bin/infer_model.py --concept_map ${DATA_FOLDER}/concept_idx.json \
 echo python bin/self_explain_characterizer.py --concept_map ${DATA_FOLDER}/concept_idx.json \
   --tsv_filename ${DATA_FOLDER}/test.tsv \
   --checkpoint lightning_logs/version_2/checkpoints/epoch\=2-step\=10524-val_acc_epoch\=0.9300.ckpt
+
+echo "--"
+MODEL_FOLDER=~/malise/models/self_explain/0.0.1
+echo python bin/self_explain_characterizer.py --concept_map ${MODEL_FOLDER}/concept_idx.json \
+  --tsv_filename ${DATA_FOLDER}/test.tsv \
+  --checkpoint lightning_logs/version_2/checkpoints/epoch\=2-step\=10524-val_acc_epoch\=0.9300.ckpt
