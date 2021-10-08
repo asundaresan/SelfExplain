@@ -77,7 +77,7 @@ class SelfExplainCharacterizer(object):
         return output_filename
 
 
-    def process(self, text: str, convert=False):
+    def process(self, text: str, convert=False, batch_size=32):
         """ Process text to get probability and evidence
 
         Args: 
@@ -89,7 +89,7 @@ class SelfExplainCharacterizer(object):
         data = convert_to_sentences(text, convert=convert)
         # get location of parse_tree_filename
         parse_tree_filename = self.compute_parse_tree(data)
-        batch_size = min(256, len(data))
+        batch_size = min(batch_size, len(data))
         result = self.evaluate(parse_tree_filename, batch_size=batch_size)
         # XXX this should be max of score values 
         prob = max(result["scores"])
