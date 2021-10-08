@@ -1,7 +1,10 @@
 import argparse
 import json
 from collections import OrderedDict
+import spacy
 
+import tqdm
+import spacy
 import torch
 from transformers import AutoTokenizer, AutoModel, RobertaConfig, XLNetConfig
 from transformers.modeling_utils import SequenceSummary
@@ -18,19 +21,32 @@ def concept_store(model_name, input_file_name, output_folder, max_concept_length
     config = config_dict[model_name]
     sequence_summary = SequenceSummary(config)
 
+    # initialize spacy 
+    nlp = spacy.load("en_core_web_sm")
+
     concept_idx = OrderedDict()
 
     idx = 0
+    total = 0
     with open(input_file_name, 'r') as input_file:
-        for i, line in enumerate(input_file):
-            json_line = json.loads(line)
-            sentence = json_line["sentence"].strip().strip(' .')
-            if len(sentence.split()) <= max_concept_length:
-                concept_idx[idx] = sentence
-                idx += 1
+        total = sum(1 for line in input_file)
+    print(f"found {total} lines in {input_file}")
 
+
+    with open(input_file_name, 'r') as input_file:
+        for i, line in enumerate(tqdm(input_file, total=total, desc="loading concepts")):
+            json_line = json.loads(line)
+            # sentence is actually the full text
+            text = json_line["sentence"].strip().strip(' .')
+            doc = nlp(text)
+            for sentence in doc.sents:
+                if len(sentence.split()) <= max_concept_length:
+                    concept_idx[idx] = sentence
+                    idx += 1
+
+    num_batches = len(concept_idx)//batch_size
     concept_tensor = []
-    for batch in chunks(list(concept_idx.values()), n=batch_size):
+    for batch in tqdm.tqdm(chunks(list(concept_idx.values()), n=batch_size), total=num_batches):
         inputs = tokenizer(batch, padding=True, return_tensors="pt")
         for key, value in inputs.items():
             inputs[key] = value.to('cuda')
