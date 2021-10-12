@@ -2,9 +2,10 @@ import csv
 import os
 import collections
 import logging 
+import gzip
 
 
-def make_dataset(class_data: dict, split=dict(train=0.80, dev=0.1, test=0.1), balance=True, pad=True, save_dir=None):
+def make_dataset(class_data: dict, split=dict(train=0.80, dev=0.1, test=0.1), balance=True, pad=True, save_dir=None, compress=True):
     """ Make balanced dataset from class_data. 
     Class data is a dict that consists of two keys: 0 and 1
     Args: 
@@ -26,7 +27,7 @@ def make_dataset(class_data: dict, split=dict(train=0.80, dev=0.1, test=0.1), ba
     for key, value in class_data.items():
         start = 0
         class_total = len(value)
-        print(f"class '{key}': {len(value)} samples")
+        logging.info(f"class '{key}': {len(value)} samples")
         for split_key, split_frac in split.items():
             split_len = int(split_frac*len(value))
             split_total = int(split_frac*total) if total is not None else None
@@ -50,23 +51,27 @@ def make_dataset(class_data: dict, split=dict(train=0.80, dev=0.1, test=0.1), ba
                 info = f"{start}:{end} x {repeat} ({split_total} from {split_len} available)"
                 for _ in range(repeat):
                     split_data[split_key].extend(value[start:end])
-            print(f"  {split_key} <- {info}")
+            logging.info(f"  {split_key} <- {info}")
             start = end
                     
     for split_key, data in split_data.items():
         counter = collections.Counter(s["label"] for s in data)
-        print(f"{split_key}: {counter}")
+        logging.info(f"{split_key}: {counter}")
 
         if save_dir is not None:
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
-            filename = os.path.join(save_dir, f"{split_key}.tsv")
+            extension = "tsv.gz" if compress else "tsv"
+            filename = os.path.join(save_dir, f"{split_key}.{extension}")
             fieldnames = ["sentence", "label"]
             print(f"writing to {filename}: {len(data)} samples")
-            with open(filename, "w") as handle:
+            handle = gzip.open(filename, "wt") if compress else open(filename, "w")
+            try:
                 writer = csv.DictWriter(handle, fieldnames=fieldnames, delimiter="\t")
                 writer.writeheader()
                 for row in data:
                     writer.writerow(row)
+            finally:
+                handle.close()
 
 
