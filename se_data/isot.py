@@ -19,7 +19,8 @@ def clean_text(sentence):
     return sentence
 clean_text.sources = collections.Counter()
 
-def load_isot(filename: str, se_data: dict, label=None, use_text=True, use_title=False) -> dict:
+
+def load_isot(filename: str, se_data: dict, label=None, use_text=True, use_title=False) -> None:
     """ Import ISOT data into an SE compatible format
     """
     with open(filename, "r") as handle:
@@ -47,9 +48,13 @@ def import_isot():
     true_filename = os.path.join(args.folder, "True.csv")
     fake_filename = os.path.join(args.folder, "Fake.csv")
 
-    data = dict()
-    load_isot(true_filename, data, label=0)
-    print(f"sources={clean_text.sources}")
-    load_isot(fake_filename, data, label=1)
+    se_data = dict()
+    load_isot(true_filename, se_data, label=0)
+    logging.info(f"sources={clean_text.sources}")
+    load_isot(fake_filename, se_data, label=1)
 
-    make_dataset(data, save_dir=args.save_dir, balance=True, pad=False)
+    totals = {key: len(value) for key, value in se_data.items()}
+    total = sum(totals.values())
+    print(f"positive samples: {totals[1]}/{total}={totals[1]/total:.2f}")
+
+    make_dataset(se_data, save_dir=args.save_dir, balance=True, pad=False)
