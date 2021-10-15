@@ -89,6 +89,7 @@ def import_hatespeech():
     parser.add_argument("filename", type=str, help="Original data folder")
     parser.add_argument('--name', type=str, default="hsol", help="Hate speech dataset name")
     parser.add_argument('--save_dir', type=str, default=None, help="Directory to save TSV split files")
+    parser.add_argument("--balance", "-b", action="store_true", help="Balance dataset by padding")
     parser.add_argument("--verbosity", "-v", action="count", default=0, help="Verbosity level")
     args = parser.parse_args()
 
@@ -96,15 +97,17 @@ def import_hatespeech():
     logging.basicConfig(level=console_level, format='[%(asctime)s %(levelname)s] %(message)s')
 
     save_dir = os.path.dirname(args.filename) if args.save_dir is None else args.save_dir
-    kwargs = dict(balance=False, pad=False, save_dir=save_dir)
+    if args.balance:
+        save_dir = os.path.join(save_dir, "balanced")
+        kwargs = dict(save_dir=save_dir, balance=True, pad=True,)
+    else:
+        kwargs = dict(save_dir=save_dir, balance=False,)
     if args.name == "hsol":
         se_data = import_hsol(args.filename)
     elif args.name == "wsf":
         se_data = import_wsf(args.filename)
     else:
         raise RuntimeError(f"Unknown dataset name: '{args.name}'")
+    print(f"make_dataset({kwargs})")
     make_dataset(se_data, **kwargs)
-
-
-        
 

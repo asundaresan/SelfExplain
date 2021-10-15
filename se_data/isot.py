@@ -39,6 +39,7 @@ def import_isot():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("folder", type=str, help="Original data folder")
     parser.add_argument('--save_dir', type=str, default=None, help="Directory to save TSV split files")
+    parser.add_argument("--balance", "-b", action="store_true", help="Balance dataset by padding")
     parser.add_argument("--verbosity", "-v", action="count", default=0, help="Verbosity level")
     args = parser.parse_args()
 
@@ -56,5 +57,12 @@ def import_isot():
     totals = {key: len(value) for key, value in se_data.items()}
     total = sum(totals.values())
     print(f"positive samples: {totals[1]}/{total}={totals[1]/total:.2f}")
+
+    save_dir = os.path.dirname(args.filename) if args.save_dir is None else args.save_dir
+    kwargs = dict(save_dir=save_dir)
+    if args.balance:
+        kwargs.update(dict(balance=True, pad=True,)) 
+    else:
+        kwargs.update(dict(balance=False,)) 
 
     make_dataset(se_data, save_dir=args.save_dir, balance=True, pad=False)
