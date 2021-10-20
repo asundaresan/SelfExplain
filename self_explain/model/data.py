@@ -36,7 +36,7 @@ class ClassificationData(pl.LightningDataModule):
 
     def test_dataloader(self):
         dataset = ClassificationDataset(tokenizer=self.tokenizer,
-                                        data_path=f"{self.basedir}/test_parse.json")
+                                        data_path=f"{self.basedir}/test_with_parse.json")
         return DataLoader(dataset=dataset, batch_size=self.batch_size,
                           shuffle=False, num_workers=self.num_workers, collate_fn=self.collator)
 
