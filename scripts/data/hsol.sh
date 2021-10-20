@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-export DATA_FOLDER="/export/home/`hostname -s`1/data/semafor/SE/wsf/balanced"
+export DATA_FOLDER="/export/home/`hostname -s`1/data/semafor/SE/hsol/balanced"
 export TOKENIZER_NAME='xlnet-base-cased'
 export MAX_LENGTH=10
 
