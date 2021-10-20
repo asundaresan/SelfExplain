@@ -50,7 +50,7 @@ def concept_store(model_name, input_file_name, output_folder, max_concept_length
 
     num_batches = len(concept_idx)//batch_size
     concept_tensor = []
-    for batch in tqdm.tqdm(chunks(list(concept_idx.values(), desc="building concepts"), n=batch_size), total=num_batches):
+    for batch in tqdm.tqdm(chunks(list(concept_idx.values()), n=batch_size), desc="building concepts", total=num_batches):
         inputs = tokenizer(batch, padding=True, return_tensors="pt")
         for key, value in inputs.items():
             inputs[key] = value.to('cuda')
