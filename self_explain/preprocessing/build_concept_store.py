@@ -58,14 +58,12 @@ def concept_store(model_name, input_file_name, output_folder, max_concept_length
         pooled_rep = sequence_summary(outputs[0])
         concept_tensor.append(pooled_rep.detach().cpu())
 
-    if False:
-        print(f"saving pickle")
-        import pickle
-        with open("concept_tensor.pickle", "wb") as handle:
-            pickle.dump(concept_store, handle)
     concept_tensor = torch.cat(concept_tensor, dim=0)
 
-    torch.save(concept_tensor, f'{output_folder}/concept_store.pt')
+    filename = f'{output_folder}/concept_store.pt'
+    print(f"saving concept_tensor in {filename}")
+    torch.save(concept_tensor, filename)
+
     with open(f'{output_folder}/concept_idx.json', 'w') as out_file:
         json.dump(concept_idx,out_file)
 
