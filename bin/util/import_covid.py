@@ -45,13 +45,11 @@ if __name__ == "__main__":
 
 
     save_dir = os.path.dirname(args.filenames[0]) if args.save_dir is None else args.save_dir
-    balance = False
-    pad = False
     if args.balance: 
-        balance = True 
-        pad = True 
         save_dir = os.path.join(save_dir, "balanced")
-    kwargs = dict(save_dir=save_dir, balance=balance, pad=pad)
+        kwargs = dict(save_dir=save_dir, balance=True, pad=True)
+    else:
+        kwargs = dict(save_dir=save_dir, balance=False)
 
     se_data = import_covid(args.filenames)
     make_dataset(se_data, **kwargs)
