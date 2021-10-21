@@ -30,11 +30,12 @@ def check_json(var: dict):
 if __name__ == "__main__":
     #rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
     #resource.setrlimit(resource.RLIMIT_NOFILE, (4096, rlimit[1]))
-    base_dir = os.path.join(os.path.expanduser("~"), ".malise", "models", "self_explain")
+    base_dir = os.path.join(os.path.expanduser("~"), "malise", "models")
 
     parser = ArgumentParser()
     parser.add_argument('--checkpoint', type=str, required=True, help="Checkpoint to load")
-    parser.add_argument('--base_dir', type=str, default=base_dir, help="Output location")
+    parser.add_argument('--base_dir', type=str, default=base_dir, help="Output location for model")
+    parser.add_argument('--name', type=str, default="self_explain_news", help="Name of model self_explain_news, self_explain_social")
     parser.add_argument('--save_dir', type=str, default=None, help="Output location")
     parser.add_argument('--version', type=str, default="0.0.1", help="Output location")
     parser.add_argument("--verbosity", "-v", action="count", default=0, help="Verbosity level")
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     print(f"dataset_basedir: {dataset_basedir}")
 
     # folder to export to
-    save_dir = os.path.join(args.base_dir, args.version)
+    save_dir = os.path.join(args.base_dir, args.name, args.version) if args.save_dir is None else args.save_dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     print(f"exporting model to {save_dir}")
