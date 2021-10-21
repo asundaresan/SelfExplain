@@ -15,7 +15,7 @@ def histogram(text_lens: Counter, key=None, title="none", filename=None):
     total = sum(text_lens.values())
     x = np.arange(max_len+1, dtype=int)
     y = [text_lens.get(i, 0) for i in x]
-    fig = plt.figure(num=key)
+    fig = plt.figure(num=filename)
     ax = fig.add_subplot(111)
     ax.bar(x, y)
     ax.set_xlabel(f"{key} length")
@@ -111,3 +111,4 @@ if __name__ == "__main__":
 
     if args.show:
         plt.show()
+
