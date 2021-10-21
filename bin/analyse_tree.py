@@ -71,32 +71,29 @@ if __name__ == "__main__":
     phrase_labels_info = ", ".join(args.phrase_labels)
     for filename in filenames:
         print("--")
-        data = list()
-        with open(filename, "r") as handle:
-            for line in tqdm.tqdm(handle.readlines(), desc=f"reading {filename}"):
-                data.append(json.loads(line))
-                if len(data) > args.number and args.number > 0:
-                    break
-        print(f"loaded {filename} ({len(data)})")
-
+        datalen = 0
         phrase_labels = Counter()
         sentence_lens = Counter()
         phrase_lens = Counter()
         phrases = set()
-        for d in data: 
-            sentence_len = len(d["sentence"].split())
-            sentence_lens.update([sentence_len,])
-            phrase_labels.update([leaf["phrase_label"] for leaf in d["parse_tree"]])
-            for leaf in d["parse_tree"]:
-                if leaf["phrase_label"] in args.phrase_labels:
-                    phrase = leaf["phrase"].lower()
-                    phrases.add(phrase)
-                    phrase_len = len(phrase.split())
-                    if phrase_len >= sentence_len:
-                        logging.info(f"phrase_len={phrase_len} but sentence_len={sentence_len}\n\tphrase='{phrase}'\n\tsentence='{d['sentence']}'")
-                    phrase_lens.update([phrase_len,])
-
-        print(f"number of phrases ({phrase_labels_info}): {len(phrases)} from {len(data)} inputs")
+        print(f"loading {filename}...")
+        with open(filename, "r") as handle:
+            for datalen, line in enumerate(tqdm.tqdm(handle.readlines(), desc=f"reading {filename}")):
+                d = json.loads(line)
+                if datalen+1 > args.number and args.number > 0:
+                    break
+                sentence_len = len(d["sentence"].split())
+                sentence_lens.update([sentence_len,])
+                phrase_labels.update([leaf["phrase_label"] for leaf in d["parse_tree"]])
+                for leaf in d["parse_tree"]:
+                    if leaf["phrase_label"] in args.phrase_labels:
+                        phrase = leaf["phrase"].lower()
+                        phrases.add(phrase)
+                        phrase_len = len(phrase.split())
+                        if phrase_len >= sentence_len:
+                            logging.info(f"phrase_len={phrase_len} but sentence_len={sentence_len}\n\tphrase='{phrase}'\n\tsentence='{d['sentence']}'")
+                        phrase_lens.update([phrase_len,])
+        print(f"number of phrases ({phrase_labels_info}): {len(phrases)} from {datalen} inputs")
         logging.info("phrase lengths: {phrase_labels}")
 
         # implicit structure of filename
