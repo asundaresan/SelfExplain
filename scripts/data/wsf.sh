@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 export EXPERIMENT="wsf"
-export DATA_FOLDER="/export/home/`hostname -s`1/`whoami`/data/semafor/SE/${EXPERIMENT}/balanced"
+export DATA_FOLDER="data/semafor/SE/${EXPERIMENT}/balanced"
 export TOKENIZER_NAME='xlnet-base-cased'
 export MAX_LENGTH=10
 
@@ -17,16 +17,18 @@ echo python bin/build_concept_store.py -i $DATA_FOLDER/train_with_parse.json -o 
 echo python bin/train.py --dataset_basedir ${DATA_FOLDER} --lr 2e-5  --max_epochs 5 --gpus 1 --concept_store ${DATA_FOLDER}/concept_store.pt --default_root_dir logs/${EXPERIMENT}
 
 echo "--"
+echo find logs/${EXPERIMENT} -iname epoch\*.ckpt 
+
 echo python bin/infer_model.py --concept_map ${DATA_FOLDER}/concept_idx.json \
-  --dev_file ${DATA_FOLDER}/dev_with_parse.json \
-  --ckpt lightning_logs/version_2/checkpoints/epoch\=2-step\=10524-val_acc_epoch\=0.9300.ckpt
+  --dataset_basedir ${DATA_FOLDER} \
+  --ckpt 
 
 echo python bin/self_explain_characterizer.py --concept_map ${DATA_FOLDER}/concept_idx.json \
   --tsv_filename ${DATA_FOLDER}/test.tsv \
-  --checkpoint lightning_logs/version_2/checkpoints/epoch\=2-step\=10524-val_acc_epoch\=0.9300.ckpt
+  --checkpoint
 
 echo "--"
 MODEL_FOLDER=~/malise/models/self_explain/0.0.1
 echo python bin/self_explain_characterizer.py --concept_map ${MODEL_FOLDER}/concept_idx.json \
   --tsv_filename ${DATA_FOLDER}/test.tsv \
-  --checkpoint lightning_logs/version_2/checkpoints/epoch\=2-step\=10524-val_acc_epoch\=0.9300.ckpt
+  --checkpoint 
