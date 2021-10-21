@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from operator import itemgetter
@@ -27,6 +28,7 @@ def load_model(ckpt, batch_size, gpus=1):
 
 def load_dev_examples(file_name):
     dev_samples = []
+    logging.info(f"loading dev from {file_name}")
     with open(file_name, 'r') as open_file:
         for line in open_file:
             dev_samples.append(json.loads(line))
@@ -60,10 +62,13 @@ def evaluate(model, dataloader, concept_map, dev_file, paths_output_loc: str = N
 
             total_evaluated += len(batch)
             total_correct += (acc.item() * len(batch))
-            logging.info(f"Accuracy = {round((total_correct * 100) / (total_evaluated), 2)}, Batch accuracy = {round(acc.item(), 2)}")
+            logging.info(f"accuracy = {round((total_correct * 100) / (total_evaluated), 2)}, Batch accuracy = {round(acc.item(), 2)}")
             i += input_tokens.size(0)
-        print(f"Accuracy = {round((total_correct * 100) / (total_evaluated), 2)}")
-        print(f"Accuracy = {round(np.array(accs).mean(), 2)}")
+        accuracy = total_correct/total_evaluated
+        print(f"accuracy = {round((total_correct * 100) / (total_evaluated), 2)}")
+        print(f"accuracy = {round(np.array(accs).mean(), 2)}")
+    if not os.path.exists(os.path.dirname(paths_output_loc)):
+        os.makedirs(os.path.dirname(paths_output_loc))
     pd.DataFrame({"predicted_labels": predicted_labels, "true_labels": true_labels, "lil_interpretations": lil_overall,
                   "gil_interpretations": gil_overall}).to_csv(paths_output_loc, sep="\t", index=None)
 

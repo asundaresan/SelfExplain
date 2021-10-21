@@ -2,6 +2,8 @@
 source[TAB]target
 """
 import logging
+import os
+
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
@@ -35,18 +37,18 @@ class ClassificationData(pl.LightningDataModule):
                           shuffle=False, num_workers=self.num_workers, collate_fn=self.collator)
 
     def test_dataloader(self):
-        dataset = ClassificationDataset(tokenizer=self.tokenizer,
-                                        data_path=f"{self.basedir}/test_with_parse.json")
+        data_path = os.path.join(self.basedir, "test_with_parse.json")
+        dataset = ClassificationDataset(tokenizer=self.tokenizer, data_path=data_path)
         return DataLoader(dataset=dataset, batch_size=self.batch_size,
                           shuffle=False, num_workers=self.num_workers, collate_fn=self.collator)
-
-
 
 
 
 class ClassificationDataset(Dataset):
     def __init__(self, tokenizer, data_path: str, progress_bar=False) -> None:
         super().__init__()
+        if not os.path.exists(data_path): 
+            raise RuntimeError(f"data file not present: {data_path}")
         self.data_path = data_path
         self.tokenizer = tokenizer
         self.disable = not progress_bar
