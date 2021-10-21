@@ -28,7 +28,6 @@ echo python bin/self_explain_characterizer.py --concept_map ${DATA_FOLDER}/conce
   --checkpoint
 
 echo "--"
-MODEL_FOLDER=~/malise/models/self_explain/0.0.1
-echo python bin/self_explain_characterizer.py --concept_map ${MODEL_FOLDER}/concept_idx.json \
-  --tsv_filename ${DATA_FOLDER}/test.tsv \
-  --checkpoint 
+NAME=self_explain_social
+VERSION=0.0.1
+echo python bin/export_model.py --name ${NAME} --version ${VERSION} --checkpoint 
