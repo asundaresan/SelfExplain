@@ -3,6 +3,7 @@ import logging
 import json
 import resource
 from argparse import ArgumentParser
+from self_explain.plot_roc import plot_roc
 
 from self_explain.model.infer_model import evaluate, load_model, load_concept_map
 
@@ -29,6 +30,7 @@ if __name__ == "__main__":
 
     splits = {"test": dict(filename="test_with_parse.json", dataloader=dm.test_dataloader()),
         "validation": dict(filename="dev_with_parse.json", dataloader=dm.val_dataloader()),
+        "train": dict(filename="train_with_parse.json", dataloader=dm.train_dataloader()),
         }
 
 
@@ -41,5 +43,7 @@ if __name__ == "__main__":
         paths_output_loc = os.path.splitext(value["filename"])[0] + "_output.tsv"
         paths_output_loc = os.path.join(args.dataset_basedir, "results", paths_output_loc)
 
-        evaluate(model, dataloader, concept_map=concept_map, dev_file=dev_file, paths_output_loc=paths_output_loc)
+        y_true, y_pred = evaluate(model, dataloader, concept_map=concept_map, dev_file=dev_file, paths_output_loc=paths_output_loc)
+        save_dir = os.path.join(args.dataset_basedir, "results", key)
+        plot_roc(y_true, y_pred, save_dir=save_dir, key=key)
 
