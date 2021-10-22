@@ -42,16 +42,23 @@ def evaluate(model, dataloader, concept_map, dev_file, paths_output_loc: str = N
     i = 0
     predicted_labels, true_labels, gil_overall, lil_overall = [], [], [], []
     accs = []
+    y_true = []
+    y_pred = []
     with torch.no_grad():
         for batch in tqdm(dataloader, total=len(dataloader)):
             input_tokens, token_type_ids, nt_idx_matrix, labels = batch
             logits, acc, interpret_dict_list = model(batch)
+            #print(f"labels.shape={labels.shape}, logits.shape={logits.shape}")
             gil_interpretations = gil_interpret(concept_map=concept_map,
                                                 list_of_interpret_dict=interpret_dict_list)
             lil_interpretations = lil_interpret(logits=logits,
                                                 list_of_interpret_dict=interpret_dict_list,
                                                 dev_samples=dev_samples,
                                                 current_idx=i)
+            y_true.extend(labels.tolist())
+            output = torch.softmax(logits, dim=1).numpy()
+            y_pred.extend(output[:,1])
+
             accs.append(acc)
             batch_predicted_labels = torch.argmax(logits, -1)
             predicted_labels.extend(batch_predicted_labels.tolist())
@@ -67,10 +74,14 @@ def evaluate(model, dataloader, concept_map, dev_file, paths_output_loc: str = N
         accuracy = total_correct/total_evaluated
         print(f"accuracy = {round((total_correct * 100) / (total_evaluated), 2)}")
         print(f"accuracy = {round(np.array(accs).mean(), 2)}")
+
+    print(f"saving to results.npz")
+    np.savez("results.npz", y_true=np.array(y_true), y_pred=np.array(y_pred))
     if not os.path.exists(os.path.dirname(paths_output_loc)):
         os.makedirs(os.path.dirname(paths_output_loc))
     pd.DataFrame({"predicted_labels": predicted_labels, "true_labels": true_labels, "lil_interpretations": lil_overall,
                   "gil_interpretations": gil_overall}).to_csv(paths_output_loc, sep="\t", index=None)
+    return y_true, y_pred
 
 
 def gil_interpret(concept_map, list_of_interpret_dict):
