@@ -87,7 +87,7 @@ class SelfExplainCharacterizer(object):
                     If using SST-2, it is not necessary, otherwise the text should be split into sentences
                     and processsed appropriately.
         """
-        data = [dict(sentence=sentence, label=label) for sentence in [text,]]
+        data = [dict(sentence=sentence, label=0) for sentence in [text,]]
         # get location of parse_tree_filename
         parse_tree_filename = self.compute_parse_tree(data)
         batch_size = min(batch_size, len(data))
