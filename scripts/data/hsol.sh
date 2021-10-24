@@ -3,7 +3,7 @@
 export EXPERIMENT="hsol"
 export DATA_FOLDER="data/semafor/SE/${EXPERIMENT}/balanced"
 export TOKENIZER_NAME='xlnet-base-cased'
-export MAX_LENGTH=10
+export MAX_LENGTH=3
 
 echo export CUDA_VISIBLE_DEVICES=1
 

@@ -3,9 +3,9 @@
 export EXPERIMENT="isot"
 export DATA_FOLDER="data/semafor/SE/${EXPERIMENT}/balanced"
 export TOKENIZER_NAME='xlnet-base-cased'
-export MAX_LENGTH=5
+export MAX_LENGTH=3
 
-echo export CUDA_VISIBLE_DEVICES=2
+echo export CUDA_VISIBLE_DEVICES=1
 
 # Creates jsonl files for train and dev
 echo python bin/store_parse_trees.py --data_dir $DATA_FOLDER  --tokenizer_name $TOKENIZER_NAME
