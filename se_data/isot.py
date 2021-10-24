@@ -20,15 +20,19 @@ def clean_text(sentence):
 clean_text.sources = collections.Counter()
 
 
-def load_isot(filename: str, se_data: dict, label=None, use_text=False, use_title=True) -> None:
+def load_isot(filename: str, se_data: dict, label=None, use_title=True) -> None:
     """ Import ISOT data into an SE compatible format
     """
+    print(f"use_title={use_title}")
     with open(filename, "r") as handle:
         reader = csv.DictReader(handle)
 
         for row in tqdm.tqdm(reader, desc=f"loading {filename}"):
-            sentence = row.get("text")
-            sentence = clean_text(sentence)
+            if use_title:
+                sentence = row.get("title")
+            else:
+                sentence = row.get("text")
+                sentence = clean_text(sentence)
             d = dict(sentence=sentence, label=label)
             if not label in se_data:
                 se_data[label] = []
