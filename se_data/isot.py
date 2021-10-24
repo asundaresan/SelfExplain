@@ -20,7 +20,7 @@ def clean_text(sentence):
 clean_text.sources = collections.Counter()
 
 
-def load_isot(filename: str, se_data: dict, label=None, use_text=True, use_title=False) -> None:
+def load_isot(filename: str, se_data: dict, label=None, use_text=False, use_title=True) -> None:
     """ Import ISOT data into an SE compatible format
     """
     with open(filename, "r") as handle:
@@ -59,10 +59,11 @@ def import_isot():
     print(f"positive samples: {totals[1]}/{total}={totals[1]/total:.2f}")
 
     save_dir = os.path.dirname(args.filename) if args.save_dir is None else args.save_dir
-    kwargs = dict(save_dir=save_dir)
+    kwargs = dict()
     if args.balance:
-        kwargs.update(dict(balance=True, pad=True,)) 
+        save_dir = os.path.join(save_dir, "balanced")
+        kwargs.update(dict(save_dir=save_dir, balance=True, pad=True,)) 
     else:
-        kwargs.update(dict(balance=False,)) 
+        kwargs.update(dict(save_dir=save_dir, balance=False,)) 
 
-    make_dataset(se_data, save_dir=args.save_dir, balance=True, pad=False)
+    make_dataset(se_data, **kwargs)
