@@ -25,7 +25,11 @@ class ParsedDataset(object):
                 next(reader, None)  # skip header
                 for row in tqdm.tqdm(reader, total=total, desc="Store parsed tree", disable=self.disable):
                     text = row[0]
-                    parse_tree, nt_idx_matrix = self.parser.get_parse_tree_for_raw_sent(raw_sent=text)
+                    try:
+                        parse_tree, nt_idx_matrix = self.parser.get_parse_tree_for_raw_sent(raw_sent=text)
+                    except Exception as e:
+                        logging.error(f"failed to parse sentence '{text}', will skip it. {e}")
+                        continue
                     datapoint_dict = {'sentence': row[0],
                                       'parse_tree': parse_tree,
                                       'label': row[1],
