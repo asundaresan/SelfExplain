@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
     requirements = f.read()
 
 setup(name='self_explain',
-      version='0.2.0',
+      version='0.2.1dev',
       description='Self Explain module',
       url='http://github.com/asundaresan/SelfExplain.git',
       author='Dheeraj Rajagopal, Vidisha Balachandran, Artidoro Pagnoni, Aravind Sundaresan',
