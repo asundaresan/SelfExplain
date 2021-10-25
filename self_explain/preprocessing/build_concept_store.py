@@ -13,7 +13,7 @@ from .utils import chunks
 config_dict = {'xlnet-base-cased': XLNetConfig,
                'roberta-base': RobertaConfig}
 
-def concept_store(model_name, input_file_name, output_folder, max_concept_length, batch_size=5):
+def concept_store(model_name, input_file_name, output_folder, max_concept_length, batch_size=8, use_sentence=False):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name).to('cuda')
     model.eval()
@@ -23,9 +23,8 @@ def concept_store(model_name, input_file_name, output_folder, max_concept_length
     # initialize spacy 
     nlp = spacy.load("en_core_web_sm")
 
-    concept_idx = OrderedDict()
+    concept_set = set()
 
-    idx = 0
     total = 0
     with open(input_file_name, 'r') as input_file:
         total = sum(1 for line in input_file)
@@ -36,17 +35,29 @@ def concept_store(model_name, input_file_name, output_folder, max_concept_length
     with open(input_file_name, 'r') as input_file:
         for i, line in enumerate(tqdm.tqdm(input_file, total=total, desc="loading concepts")):
             json_line = json.loads(line)
-            # sentence is actually the full text
-            text = json_line["sentence"].strip().strip(' .')
-            doc = nlp(text)
-            for sentence in doc.sents:
-                sentence = sentence.text
-                sentence_length = len(sentence.split())
-                sentence_lengths.update([sentence_length,])
+            if use_sentence:
+                # sentence is actually the full text
+                text = json_line["sentence"].strip().strip(' .')
+                doc = nlp(text)
+                for sentence in doc.sents:
+                    sentence = sentence.text
+                    sentence_length = len(sentence.split())
+                    sentence_lengths.update([sentence_length,])
 
-                if len(sentence.split()) <= max_concept_length:
-                    concept_idx[idx] = sentence
-                    idx += 1
+                    if len(sentence.split()) <= max_concept_length:
+                        concept_set.add()
+            else:
+                phrase_labels = ["NP", "VP",]
+                for leaf in json_line["parse_tree"]:
+                    if leaf["phrase_label"] in phrase_labels:
+                        phrase = leaf["phrase"].lower()
+                        phrase_len = len(phrase.split())
+                        if phrase_len < max_concept_length:
+                            concept_set.add(phrase)
+
+
+    concept_idx = {i: value for i, value in enumerate(concept_set)}
+    print(f"mapped {total} inputs to {len(concept_set)} concepts.")
 
     num_batches = len(concept_idx)//batch_size
     concept_tensor = []
@@ -65,7 +76,7 @@ def concept_store(model_name, input_file_name, output_folder, max_concept_length
     torch.save(concept_tensor, filename)
 
     with open(f'{output_folder}/concept_idx.json', 'w') as out_file:
-        json.dump(concept_idx,out_file)
+        json.dump(concept_idx, out_file, indent=2)
 
     return
 
