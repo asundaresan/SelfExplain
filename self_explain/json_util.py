@@ -114,6 +114,8 @@ def load_json(filename, folder=None, **kwargs):
     elif filename.endswith(".json.gz"):
         with gzip.open(filename) as handle:
             data = json.load(handle)
+    else:
+        raise RuntimeError(f"unsupported file {filename}")
     logging.debug(f"Loaded data from {filename} ({len(data)} items)")
     logging.debug(f"Setting relative path with folder {folder}, kwargs={kwargs}")
     join_relative_path(data, folder, **kwargs)

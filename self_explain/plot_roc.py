@@ -12,7 +12,9 @@ def plot_roc(Y_true, Y_pred, save_dir=None, key=None, xlim=[0, 1], ylim=[0, 1]):
     """
     Y_true = np.array(Y_true)
     Y_pred = np.array(Y_pred)
-    thresholds = np.linspace(Y_pred.min(), Y_pred.max(), 100)
+    y_min = min(0, Y_pred.min())
+    y_max = max(0, Y_pred.max())
+    thresholds = np.linspace(y_min, y_max, 100)
 
     Y_true = Y_true.astype(int)
     positive_indices = np.where(Y_true > 0.5)
@@ -27,6 +29,7 @@ def plot_roc(Y_true, Y_pred, save_dir=None, key=None, xlim=[0, 1], ylim=[0, 1]):
     roc = np.array(roc, dtype=[("fp", "f"), ("tp", "f")])
 
     accuracy = ((Y_pred>0.5).astype(int) == Y_true).sum()/Y_true.size
+    plt.close("hist")
     title = f"{key} ROC (accuracy={100*accuracy:.1f}%)"
     fig = plt.figure(num="hist")
     width = (thresholds[1] - thresholds[0])/2
@@ -36,15 +39,18 @@ def plot_roc(Y_true, Y_pred, save_dir=None, key=None, xlim=[0, 1], ylim=[0, 1]):
     plt.ylabel("detections above threshold")
     plt.legend()
     plt.grid()
+    plt.xlim(xlim)
+    plt.ylim(xlim)
     plt.title(f"{key} true/false positives ")
     plt.tight_layout()
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    filename = os.path.join(save_dir, "hist.png")
-    print(f"saving histogram to {filename}")
-    fig.savefig( filename )
-    plt.close("hist")
+    if save_dir is not None:
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        filename = os.path.join(save_dir, "hist.png")
+        print(f"saving histogram to {filename}")
+        fig.savefig( filename )
 
+    plt.close("roc")
     fig = plt.figure(num="roc")
     plt.plot(roc["fp"],roc["tp"], label=save_dir)
     plt.legend(loc="lower right")
@@ -54,9 +60,9 @@ def plot_roc(Y_true, Y_pred, save_dir=None, key=None, xlim=[0, 1], ylim=[0, 1]):
     plt.title(title)
     plt.xlabel("False Positive rate")
     plt.ylabel("True Positive rate")
-    filename = os.path.join(save_dir, "roc.png")
-    print(f"saving ROC to {filename}")
-    fig.savefig(filename)
-    plt.close("roc")
+    if save_dir is not None:
+        filename = os.path.join(save_dir, "roc.png")
+        print(f"saving ROC to {filename}")
+        fig.savefig(filename)
 
 
