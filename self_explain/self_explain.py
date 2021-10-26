@@ -5,36 +5,20 @@ import datetime
 import numpy as np
 import csv
 import re
+import spacy
+
+from typing import Tuple, List
 
 from .model.SE_XLNet import SEXLNet
 from .model.infer_model import gil_interpret, lil_interpret, load_concept_map, load_dev_examples
 from .model.data import ClassificationData
 from .preprocessing.store_parse_trees import ParsedDataset
 
-def convert_to_sentences(text, convert=False, label=0) -> list:
-    """ Process text into sentences
-
-    Args: 
-        text (str)
-
-    Returns:
-        list of dict each with 'sentence' and 'label' key
-    """
-    if convert:
-        text = re.sub(r"(\.)", r"\1\n", text)
-        text = re.sub(r"(\?)", r"\1\n", text)
-        text = re.sub(r"(\!)", r"\1\n", text)
-        text = re.sub(r"(\.|\?|\!|,|')", r" \1", text)
-        sentences = [s for s in text.split("\n") if len(s.split()) > 0]
-    else:
-        sentences = [text,]
-    data = [dict(sentence=sentence, label=label) for sentence in sentences]
-    return data 
-
 
 
 class SelfExplainCharacterizer(object):
     def __init__(self, checkpoint_filename=None, concept_map_filename=None, **kwargs):
+        self.nlp = spacy.load("en_core_web_sm")
         # get override parameters for load_from_checkpoint (concept_store, hparams, etc)
         checkpoint_kwargs = kwargs.get("checkpoint_kwargs", {})
         # what tokenizer to use 
@@ -53,6 +37,16 @@ class SelfExplainCharacterizer(object):
         self.save_dir = os.path.join("output", datetime.datetime.now().strftime("%Y_%m_%d__%H%M%S"))
         print(f"- save_dir: {self.save_dir}")
         self.count = 0
+
+
+    def to_sentences(self, text) -> List[str]:
+        """ Convert input into sentences
+        """
+        doc = self.nlp(text)
+        sentences = []
+        for sentence in doc.sents:
+            sentences.append(sentence.text)
+        return sentences
 
 
     def compute_parse_tree(self, data: list) -> str:
@@ -78,21 +72,17 @@ class SelfExplainCharacterizer(object):
         return output_filename
 
 
-    def process(self, text: str, convert=False, batch_size=32):
+    def process(self, text: str, batch_size=32, label=0):
         """ Process text to get probability and evidence
 
         Args: 
             text (str): text to process 
-            convert (bool): Flag to indicate if text should be converted into sentences.
-                    If using SST-2, it is not necessary, otherwise the text should be split into sentences
-                    and processsed appropriately.
         """
-        data = [dict(sentence=sentence, label=0) for sentence in [text,]]
+        data = [dict(sentence=sentence, label=label) for sentence in self.to_sentences(text)]
         # get location of parse_tree_filename
         parse_tree_filename = self.compute_parse_tree(data)
         batch_size = min(batch_size, len(data))
         result = self.evaluate(parse_tree_filename, batch_size=batch_size)
-        # XXX this should be max of score values 
         prob = max(result["scores"])
         evidence = dict()
         return prob, evidence
@@ -101,6 +91,7 @@ class SelfExplainCharacterizer(object):
     def evaluate(self, parse_tree_filename, batch_size=1):
         # load dev samples from file 
         samples = load_dev_examples(parse_tree_filename)
+        logging.debug(f"loaded {len(samples)} from {parse_tree_filename}")
         # split it into batches to match dataloader
         dev_samples_batches = [samples[start:start+batch_size] for start in range(0, len(samples), batch_size)]
         # get dataloader 
